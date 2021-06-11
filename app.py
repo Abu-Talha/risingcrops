@@ -44,7 +44,18 @@ def main():
     		else:
     			st.warning("Incorrect Username/Password")
 
-    elif choice == "Sign Up"			
+    elif choice == "Sign Up":
+    	new_username = st.text_input("User Name")
+    	new_password = st.text_input("Password", type='password')
+
+    	confirm_password = st.text_input("ConfirmPassword", type='password')
+    	if new_password == confirm_password:
+    		st.success("Password Confirmed")
+    	else:
+    		st.warning("Passwords are not the same")
+
+    	if st.button("Submit"):
+    		pass 			
 
 
 if __name__ == '__main__':
