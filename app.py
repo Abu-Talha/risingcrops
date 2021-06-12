@@ -8,11 +8,25 @@ import numpy as np
 #Utilities
 import os
 import joblib
+import hashlib
 
 #Data Viz Packages
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')
+
+#Database
+from managed_db import *
+
+#Password
+def  generate_hashes(password): 
+	return hashlib.sha256(str.encode(password)).hexdigest()
+
+def verify_hashes(password,hashed_text):
+	if generate_hashes(password) == hashed_text:
+		return hashed_text
+	return False
+	
 
 def main():
     """ Crop Recommendation Engine """
@@ -55,7 +69,13 @@ def main():
     		st.warning("Passwords are not the same")
 
     	if st.button("Submit"):
-    		pass 			
+    		create_usertable()
+    		hashed_new_password = generate_hashes(new_password)
+    		add_userdata(new_username,hashed_new_password)
+    		st.success("You have successfully created a new account")
+    		st.info("Login to Get Started")
+
+    		 			
 
 
 if __name__ == '__main__':

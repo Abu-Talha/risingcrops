@@ -1,5 +1,5 @@
 import sqlite3
-conn = sqlite3.connect("usersdata.db")
+conn = sqlite3.connect("usersdata.db", check_same_thread=False)
 c = conn.cursor()
 
 
@@ -9,7 +9,7 @@ def create_usertable():
 
 
 def add_userdata(username,password):
-	c.execute('INSERT INTO userstable WHERE username =? AND password = ?',(username,password))
+	c.execute('INSERT INTO userstable(username,password) VALUES (?,?)',(username,password))
 	conn.commit()
 
 def login_user(username,password):
