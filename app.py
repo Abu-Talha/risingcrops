@@ -7,12 +7,12 @@ import numpy as np
 
 #Utilities
 import os
-<<<<<<< HEAD
+#<<<<<<< HEAD
 import joblib
 import hashlib
-=======
+#=======
 #import joblib
->>>>>>> 3962a2454050ac20573dada78d2fc1ac58ae4dac
+#>>>>>>> 3962a2454050ac20573dada78d2fc1ac58ae4dac
 
 #Data Viz Packages
 import matplotlib.pyplot as plt
@@ -48,7 +48,12 @@ def main():
     	username = st.sidebar.text_input("Username")
     	password = st.sidebar.text_input("Password", type='password')
     	if st.sidebar.checkbox("Login"):
-    		if password == "12345":
+    		create_usertable()
+    		hashed_pswd = generate_hashes(password)
+    		result = login_user(username,verify_hashes(password,hashed_pswd))
+
+    		#if password == "12345":
+    		if result:
     			st.success("Welcome {}".format(username))
 
     			activity = st.selectbox("Activity", submenu)
