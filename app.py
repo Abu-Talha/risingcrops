@@ -4,6 +4,7 @@ import streamlit as st
 #EDA Packages
 import pandas as pd 
 import numpy as np
+import pickle
 
 #Utilities
 import os
@@ -25,7 +26,11 @@ def verify_hashes(password,hashed_text):
 	if generate_hashes(password) == hashed_text:
 		return hashed_text
 	return False
+
+# Pkl Model - Random Forest
+model = pickle.load(open('models/RandomForest.pkl','rb'))
 	
+feature_names_best = ['N', 'P', 'K', 'temperature', 'humidity', 'rainfall', 'ph']
 
 def main():
     """ Crop Recommendation Engine """
@@ -54,6 +59,23 @@ def main():
     			activity = st.selectbox("Activity", submenu)
     			if activity =="Crop Recommendation":
     				st.subheader("Crop Recommendation Engine")
+    				df = pd.read_csv('data/crop_recommendation.csv')
+    				
+    				N = st.slider("N - Nitrogen Value" , 0,100)
+    				P = st.slider("P - Phosphorus Value" , 0,100)
+    				K = st.slider("K - Potassium Value" , 0,100)
+    				ph = st.slider("PH of the soil" , 0,14)
+    				temperature = st.number_input("Temperature (in C)", 0,100)
+    				humidity = st.number_input("Humidity", 0,100)
+    				rainfall = st.number_input("Rainfall (in mm)", 0,300)
+
+    				data = np.array([[N, P, K, temperature, humidity, ph, rainfall]])
+    				my_prediction = model.predict(data)
+    				final_prediction = my_prediction[0]
+
+    				st.title(final_prediction)
+    				st.write("Change the parameters as per your situation")
+
 
     			elif activity == "Disease Detection":
     				st.subheader("Disease Detection via Image Recognition")
