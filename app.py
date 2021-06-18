@@ -39,10 +39,12 @@ mgr=owm.weather_manager()
 
 degree_sign= u'\N{DEGREE SIGN}'
 
+season_dict = {"Kharif":0,"Rabi":1,"Zaid":2}
+
 # Pkl Model - Random Forest
-model = pickle.load(open('models/RandomForest.pkl','rb'))
+model = pickle.load(open('models/RandomForest1.pkl','rb'))
 	
-feature_names_best = ['N', 'P', 'K', 'temperature', 'humidity', 'rainfall', 'ph']
+feature_names_best = ['N', 'P', 'K', 'temperature', 'humidity', 'rainfall', 'ph','season']
 
 def main():
     """ Crop Recommendation Engine """
@@ -71,7 +73,7 @@ def main():
     			activity = st.selectbox("Activity", submenu)
     			if activity =="Crop Recommendation":
     				st.subheader("Crop Recommendation Engine")
-    				df = pd.read_csv('data/crop_recommendation.csv')
+    				df = pd.read_csv('data/crop_recommendation1.csv')
     				
     				N = st.slider("N - Nitrogen Value" , 0,100)
     				P = st.slider("P - Phosphorus Value" , 0,100)
@@ -80,8 +82,9 @@ def main():
     				temperature = st.number_input("Temperature (in C)", 0.0,100.0)
     				humidity = st.number_input("Humidity", 0.0,100.0)
     				rainfall = st.number_input("Rainfall (in mm)", 0.0,300.0)
+                    season = st.radio("Kharif","Rabi","Zaid")
 
-    				data = np.array([[N, P, K, temperature, humidity, ph, rainfall]])
+    				data = np.array([[N, P, K, temperature, humidity, ph, season,rainfall]])
     				my_prediction = model.predict(data)
     				final_prediction = my_prediction[0]
 
