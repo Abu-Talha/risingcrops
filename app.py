@@ -82,10 +82,8 @@ def main():
     				temperature = st.number_input("Temperature (in C)", 0.0,100.0)
 				humidity = st.number_input("Humidity", 0.0,100.0)
     				season = st.radio("Kharif","Rabi","Zaid")
-				
     				rainfall = st.number_input("Rainfall (in mm)", 0.0,300.0)
 				
-
     				data = np.array([[N, P, K, temperature, humidity, ph, season,rainfall]])
     				my_prediction = model.predict(data)
     				final_prediction = my_prediction[0]
