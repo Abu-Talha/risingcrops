@@ -1,6 +1,6 @@
 #Core Packages
 import streamlit as st
-
+st.beta_set_page_config(page_title='Rising Crops')
 #EDA Packages
 import pandas as pd 
 import numpy as np
