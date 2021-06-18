@@ -74,6 +74,8 @@ def main():
     			if activity =="Crop Recommendation":
     				st.subheader("Crop Recommendation Engine")
     				df = pd.read_csv('data/crop_recommendation1.csv')
+				
+				humidity = st.number_input("Humidity",0.0,100.0)
     				
     				N = st.slider("N - Nitrogen Value" , 0,100)
     				P = st.slider("P - Phosphorus Value" , 0,100)
@@ -82,7 +84,7 @@ def main():
     				temperature = st.number_input("Temperature (in C)", 0.0,100.0)
     				season = st.radio("Season",tuple(season_dict.keys()))
     				rainfall = st.number_input("Rainfall (in mm)", 0.0,300.0)
-				humidity = st.number_input("Humidity", 0.0, 100.0)
+				
 				
     				data = np.array([[N, P, K, temperature, humidity, ph, season,rainfall]])
     				my_prediction = model.predict(data)
