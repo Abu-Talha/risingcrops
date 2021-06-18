@@ -17,7 +17,7 @@ def test_database():
 import pickle
 import pandas as pd
 from sklearn import preprocessing
-PATH = 'F:/Crop Recommendation Engine/Rising Crops/data/crop_recommendation1.csv'
+PATH = 'data/crop_recommendation1.csv'
 df = pd.read_csv(PATH)
 category_col = ['season']
 labelEncoder = preprocessing.LabelEncoder() 
