@@ -39,7 +39,7 @@ mgr=owm.weather_manager()
 
 degree_sign= u'\N{DEGREE SIGN}'
 
-season_dict = {"Kharif":0,"Rabi":1,"Zaid":2}
+season_dict = {"kharif":0,"rabi":1,"zaid":2}
 
 # Pkl Model - Random Forest
 model = pickle.load(open('models/RandomForest1.pkl','rb'))
@@ -62,54 +62,56 @@ def main():
     	username = st.sidebar.text_input("Username")
     	password = st.sidebar.text_input("Password", type='password')
     	if st.sidebar.checkbox("Login"):
-            create_usertable()
-            hashed_pswd = generate_hashes(password)
-            result = login_user(username,verify_hashes(password,hashed_pswd))
+    		create_usertable()
+    		hashed_pswd = generate_hashes(password)
+    		result = login_user(username,verify_hashes(password,hashed_pswd))
 
     		#if password == "12345":
-            if result:
-                st.success("Welcome {}".format(username))
+    		if result:
+    			st.success("Welcome {}".format(username))
 
-                activity = st.selectbox("Activity", submenu)
-                if activity =="Crop Recommendation":
-                    st.subheader("Crop Recommendation Engine")
-                    df = pd.read_csv('data/crop_recommendation1.csv')
-                    N = st.slider("N - Nitrogen Value" , 0,100)
-                    P = st.slider("P - Phosphorus Value" , 0,100)
-                    K = st.slider("K - Potassium Value" , 0,100)
-                    ph = st.slider("PH of the soil" , 0.0,14.0)
-                    temperature = st.number_input("Temperature (in C)", 0.0,100.0)
-                    humidity = st.number_input("Humidity", 0.0,100.0)
-                    rainfall = st.number_input("Rainfall (in mm)", 0.0,300.0)
-                    data = np.array([[N, P, K, temperature, humidity, ph, season,rainfall]])
-                    my_prediction = model.predict(data)
-                    final_prediction = my_prediction[0]
+    			activity = st.selectbox("Activity", submenu)
+    			if activity =="Crop Recommendation":
+    				st.subheader("Crop Recommendation Engine")
+    				df = pd.read_csv('data/crop_recommendation1.csv')
+    				humidity = st.number_input("Humidity",0.0,100.0)
+    				
+    				N = st.slider("N - Nitrogen Value" , 0,100)
+    				P = st.slider("P - Phosphorus Value" , 0,100)
+    				K = st.slider("K - Potassium Value" , 0,100)
+    				ph = st.slider("PH of the soil" , 0.0,14.0)
+    				temperature = st.number_input("Temperature (in C)", 0.0,100.0)
+    				season = st.radio("Season",tuple(season_dict.keys()))
+    				rainfall = st.number_input("Rainfall (in mm)", 0.0,300.0)
+				
+				
+    				data = np.array([[N, P, K, temperature, humidity, ph, season,rainfall]])
+    				my_prediction = model.predict(data)
+    				final_prediction = my_prediction[0]
 
-                    st.title(final_prediction)
-                    st.write("Change the parameters as per your situation")
+    				st.title(final_prediction)
+    				st.write("Change the parameters as per your situation")
 
-                elif activity == "Disease Detection":
-                    st.subheader("Disease Detection via Image Recognition")
 
-                elif activity == "Weather Forecast":
-                    st.subheader("5 day Weather Forecast")
+    			elif activity == "Disease Detection":
+    				st.subheader("Disease Detection via Image Recognition")
 
-                    place=st.text_input("NAME OF THE CITY:","")
+    			elif activity == "Weather Forecast":
+    				st.subheader("5 day Weather Forecast")
 
-                    if place == None:
-                        st.write("Input a CITY!")
-
-                    unit=st.selectbox("Select Temperature Unit",("Celsius","Fahrenheit"))
-                    g_type=st.selectbox("Select Graph Type",("Line Graph","Bar Graph"))
-                    if unit == 'Celsius':
-                        unit_c = 'celsius'
-                    else:
-                        unit_c = 'fahrenheit'
-
-                    def get_temperature():
-                        days = []
-                        dates = []
-                        temp_min = []
+    				place=st.text_input("NAME OF THE CITY:","")
+    				if place == None:
+    					st.write("Input a CITY!")
+    				unit=st.selectbox("Select Temperature Unit",("Celsius","Fahrenheit"))
+    				g_type=st.selectbox("Select Graph Type",("Line Graph","Bar Graph"))
+    				if unit == 'Celsius':
+    					unit_c = 'celsius'
+    				else:
+    					unit_c = 'fahrenheit'
+    				def get_temperature():
+    					days = []
+    					dates = []
+    					temp_min = []
     					temp_max = []
     					forecaster = mgr.forecast_at_place(place, '3h')
     					forecast=forecaster.forecast
