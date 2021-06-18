@@ -80,7 +80,7 @@ def main():
     				K = st.slider("K - Potassium Value" , 0,100)
     				ph = st.slider("PH of the soil" , 0.0,14.0)
     				temperature = st.number_input("Temperature (in C)", 0.0,100.0)
-    				season = st.radio("kharif","rabi","zaid")
+    				season = st.radio("Season",tuple(season_dict.keys()))
     				rainfall = st.number_input("Rainfall (in mm)", 0.0,300.0)
 				
     				data = np.array([[N, P, K, temperature, humidity, ph, season,rainfall]])
