@@ -9,7 +9,7 @@ import joblib
 #Utilities
 import os
 import hashlib
-
+from sklearn import preprocessing
 #Data Viz Packages
 import matplotlib.pyplot as plt
 import matplotlib
@@ -94,6 +94,14 @@ def main():
     			if activity =="Crop Recommendation":
     				st.subheader("Crop Recommendation Engine")
     				df = pd.read_csv('data/crop_recommendation1.csv')
+    				category_col = ['season']
+    				labelEncoder = preprocessing.LabelEncoder()
+    				mapping_dict={}
+    				for col in category_col:
+    					df[col] = labelEncoder.fit_transform(df[col])
+    					le_name_mapping=dict(zip(labelEncoder.classes_,labelEncoder.transform(labelEncoder.classes_)))
+    					mapping_dict[col]=le_name_mapping
+
 
     				
     				N = st.slider("N - Nitrogen Value" , 0,100)
