@@ -39,7 +39,7 @@ mgr=owm.weather_manager()
 
 degree_sign= u'\N{DEGREE SIGN}'
 
-season_dict = {"Kharif":0,"Rabi":1,"Zaid":2}
+season_dict = {"kharif":0,"rabi":1,"zaid":2}
 
 # Pkl Model - Random Forest
 model = pickle.load(open('models/RandomForest1.pkl','rb'))
@@ -80,7 +80,7 @@ def main():
     				K = st.slider("K - Potassium Value" , 0,100)
     				ph = st.slider("PH of the soil" , 0.0,14.0)
     				temperature = st.number_input("Temperature (in C)", 0.0,100.0)
-    				season = st.radio("Kharif","Rabi","Zaid")
+    				season = st.radio("kharif","rabi","zaid")
     				rainfall = st.number_input("Rainfall (in mm)", 0.0,300.0)
 				
     				data = np.array([[N, P, K, temperature, humidity, ph, season,rainfall]])
