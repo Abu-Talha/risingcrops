@@ -5,7 +5,7 @@ st.beta_set_page_config(page_title='Rising Crops')
 import pandas as pd 
 import numpy as np
 import pickle
-
+import joblib
 #Utilities
 import os
 import hashlib
@@ -40,6 +40,26 @@ mgr=owm.weather_manager()
 degree_sign= u'\N{DEGREE SIGN}'
 
 season_dict = {"kharif":0,"rabi":1,"zaid":2}
+
+def get_value(val,my_dict):
+	for key,value in my_dict.items():
+		if val == key:
+			return value
+
+def get_key(val,my_dict):
+	for key,value in my_dict.items():
+		if val == key:
+			return key
+
+def get_season_value(val):
+	season_dict = {"kharif":0,"rabi":1,"zaid":2}
+	for key,value in season_dict.items():
+		if val == key:
+			return value
+
+def load_model(model):
+	loaded_model = joblib.load(open(os.path.join(model),"rb"))
+	return loaded_model
 
 # Pkl Model - Random Forest
 model = pickle.load(open('models/RandomForest1.pkl','rb'))
