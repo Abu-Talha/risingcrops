@@ -110,7 +110,7 @@ def main():
     				ph = st.slider("PH of the soil" , 0.0,14.0)
     				humidity = st.number_input("Humidity",0.0,100.0)
     				temperature = st.number_input("Temperature (in C)", 0.0,100.0)
-    				season = st.radio("Season",tuple(season_dict.keys()))
+    				season = st.radio("Season",('kharif','rabi','zaid'))
     				rainfall = st.number_input("Rainfall (in mm)", 0.0,300.0)
 				
 				
