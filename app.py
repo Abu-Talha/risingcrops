@@ -1,11 +1,13 @@
 #Core Packages
 import streamlit as st
-st.beta_set_page_config(page_title='Rising Crops')
+#st.beta_set_page_config(page_title='Rising Crops')
 #EDA Packages
 import pandas as pd 
 import numpy as np
 import pickle
 import joblib
+import torch
+from google.cloud import storage
 #Utilities
 import os
 import hashlib
@@ -14,6 +16,16 @@ from sklearn import preprocessing
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')
+#Disease Detection Packages
+import torch.nn as nn
+from torch.utils.data import DataLoader
+from PIL import Image
+import torch.nn.functional as F
+import torchvision.transforms as transforms
+from torchvision.utils import make_grid
+from torchvision.datasets import ImageFolder
+from torchsummary import summary
+
 
 #Database
 from managed_db import *
@@ -124,6 +136,163 @@ def main():
 
     			elif activity == "Disease Detection":
     				st.subheader("Disease Detection via Image Recognition")
+
+    				data_dir = "data/New Plant Diseases Dataset(Augmented)/New Plant Diseases Dataset(Augmented)"
+    				train_dir = data_dir + "/train"
+    				valid_dir = data_dir + "/valid"
+    				diseases = os.listdir(train_dir)
+    				train = ImageFolder(train_dir, transform=transforms.ToTensor())
+    				valid = ImageFolder(valid_dir, transform=transforms.ToTensor())
+    				batch_size=32
+    				train_dl = DataLoader(train, batch_size, shuffle=True, num_workers=2, pin_memory=True)
+    				valid_dl = DataLoader(valid, batch_size, num_workers=2, pin_memory=True)
+    				device = torch.device("cpu")
+    				
+    				def to_device(data,device):
+    					if isinstance(data,(list,tuple)):
+    						return [to_device(x,device) for x in data]
+    					return data.to(device, non_blocking=True)
+    				
+    				class DeviceDataLoader():
+    					def __init__(self,dl,device):
+    						self.dl=dl
+    						self.device=device
+    					
+    					def __iter__(self):
+    						for b in self.dl:
+    							yield to_device(b, self.device)
+    					
+    					def __len__(self):
+    						return len(self.dl)
+    				
+    				train_dl = DeviceDataLoader(train_dl,device)
+    				valid_dl = DeviceDataLoader(valid_dl, device)
+    				
+    				class SimpleResidualBlock(nn.Module):
+    					def __init__(self):
+    						super().__init__()
+    						self.conv1 = nn.Conv2d(in_channels=3, out_channels=3, stride=1, padding=1)
+    						self.relu1 = nn.ReLU()
+    						self.conv2 = nn.Conv2d(in_channels=3, out_channels=3, stride=1, padding=1)
+    						self.relu2 = nn.ReLU()
+    					
+    					def forward(self, x):
+    						out = self.conv1(x)
+    						out = self.relu1(out)
+    						out = self.conv2(out)
+    						return self.relu2(out) + x 
+    					
+    				def accuracy(output,labels):
+    					_, preds = torch.max(outputs, dim=1)
+    					return torch.tensor(torch.sum(preds == labels).item() / len(preds))
+
+    				class ImageClassificationBase(nn.Module):
+    					def training_step(self, batch):
+    						images, labels = batch
+    						out = self(images)
+    						loss = F.cross_entropy(out,labels)
+    						return loss
+
+    					def validation_step(self, batch):
+    						images, labels = batch
+    						out = self(images)
+    						loss = F.cross_entropy(out, labels)
+    						acc = accuracy(out, labels)
+    						return {"val_loss": loss.detach(), "val_accuracy": acc}
+
+    					def validation_epoch_end(self,outputs):
+    						batch_losses = [x["val_loss"] for x in outputs]
+    						batch_accuracy = [x["val_accuracy"] for x in outputs]
+    						epoch_loss = torch.stack(batch_losses).mean()
+    						epoch_accuracy = torch.stack(batch_accuracy).mean()
+    						return {"val_loss": epoch_loss, "val_accuracy": epoch_accuracy}
+
+    					def epoch_end(self,epoch,result):
+    						print("Epoch [{}], last_lr: {:.5f}, train_loss: {:.4f}, val_acc: {:.4f}".format(epoch, result['lrs'][-1], result['train_loss'], result['val_loss'], result['val_accuracy']))
+
+    				def ConvBlock(in_channels, out_channels, pool=False):
+    					layers = [nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1), nn.BatchNorm2d(out_channels), nn.ReLU(inplace=True)]
+    					if pool:
+    						layers.append(nn.MaxPool2d(4))
+    					return nn.Sequential(*layers)
+
+    				class ResNet9(ImageClassificationBase):
+    					def __init__(self, in_channels, num_diseases):
+    						super().__init__()
+
+    						self.conv1 = ConvBlock(in_channels, 64)
+    						self.conv2 = ConvBlock(64, 128, pool=True)
+    						self.res1 = nn.Sequential(ConvBlock(128, 128), ConvBlock(128, 128))
+    						self.conv3 = ConvBlock(128, 256, pool=True)
+    						self.conv4 = ConvBlock(256, 512, pool=True)
+    						self.res2 = nn.Sequential(ConvBlock(512, 512), ConvBlock(512, 512))
+    						self.classifier = nn.Sequential(nn.MaxPool2d(4), nn.Flatten(), nn.Linear(512, num_diseases))
+
+    					def forward(self,xb):
+    						out = self.conv1(xb)
+    						out = self.conv2(out)
+    						out = self.res1(out) + out 
+    						out = self.conv3(out)
+    						out = self.conv4(out)
+    						out = self.res2(out) + out
+    						out = self.classifier(out)
+    						return out
+    				model_d = to_device(ResNet9(3, len(train.classes)), device)
+    				@torch.no_grad()
+    				def evaluate(model_d, val_loader):
+    					model_d.eval()
+    					outputs = [model_d.validation_step(batch) for batch in val_loader]
+    					return model_d.validation_epoch_end(outputs)
+
+    				def get_lr(optimizer):
+    					for param_group in optimizer.param_groups:
+    						return param_group['lr']
+
+    				def fit_OneCycle(epochs, max_lr, model_d, train_loader, val_loader, weight_decay=0,grad_clip=None, opt_func=torch.optim.SGD):
+    					torch.cpu.empty_cache()
+    					history=[]
+    					optimizer = opt_func(model_d.parameters(), max_lr, weight_decay=weight_decay)
+    					sched = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr, epochs=epochs, steps_per_epoch=len(train_loader))
+    					for epoch in range(epochs):
+    						model_d.train()
+    						train_losses = []
+    						lrs = []
+    						for batch in train_loader:
+    							loss = model_d.training_step(batch)
+    							train_losses.append(loss)
+    							loss.backward()
+    							if grad_clip:
+    								nn.utils.clip_grad_value_(model_d.parameters(), grad_clip)
+    							optimizer.step()
+    							optimizer.zero_grad()
+    							lrs.append(get_lr(optimizer))
+    							sched.step()
+    						result = evaluate(model_d, val_loader)
+    						result['train_loss'] = torch.stack(train_losses).mean().item()
+    						result['lrs'] = lrs
+    						model_d.epoch_end(epoch,result)
+    						history.append(result)
+    					return history
+
+    				test_dir = ('data/test')
+    				test = ImageFolder(test_dir, transform=transforms.ToTensor())
+    				test_images = sorted(os.listdir(test_dir + '/test'))
+
+    				def predict_image(img, model_d):
+    					xb = to_device(img.unsqueeze(0), device)
+    					yb = model_d(xb)
+    					_, preds = torch.max(yb, dim=1)
+    					return train.classes[preds[0].item()]
+
+    				img = st.file_uploader("Pick a File")
+    				img,label = test[0]
+    				plt.imshow(img.permute(1,2,0))
+    				st.write("Disease Predicted:", predict_image(img,model_d))
+
+
+
+
+
 
     			elif activity == "Weather Forecast":
     				st.subheader("5 day Weather Forecast")
