@@ -11,10 +11,4 @@ boto
 pytest
 joblib
 torch
-torchvision.datasets
-torchvision.utils
-torchvision.transforms
-torch.nn.functional
-PIL
-torch.nn
-torch.nn.functional
+pillow
