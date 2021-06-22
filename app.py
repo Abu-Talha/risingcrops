@@ -6,8 +6,7 @@ import pandas as pd
 import numpy as np
 import pickle
 import joblib
-import torch
-from google.cloud import storage
+#import torch
 #Utilities
 import os
 import hashlib
@@ -17,14 +16,14 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')
 #Disease Detection Packages
-import torch.nn as nn
-from torch.utils.data import DataLoader
-from PIL import Image
-import torch.nn.functional as F
-import torchvision.transforms as transforms
-from torchvision.utils import make_grid
-from torchvision.datasets import ImageFolder
-from torchsummary import summary
+#import torch.nn as nn
+#from torch.utils.data import DataLoader
+#from PIL import Image
+#import torch.nn.functional as F
+#import torchvision.transforms as transforms
+#from torchvision.utils import make_grid
+#from torchvision.datasets import ImageFolder
+#from torchsummary import summary
 
 
 #Database
