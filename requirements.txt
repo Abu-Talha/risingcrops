@@ -10,4 +10,3 @@ pyowm==3.0.0
 boto
 pytest
 joblib
-torch
