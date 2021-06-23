@@ -87,7 +87,7 @@ def main():
     choice = st.sidebar.selectbox("", menu)
     if choice == "About":
     	st.subheader("Welcome to Rising Crops")
-    	st.text("Recommendation Engine - Crops | Weather Forecasting | Disease Detection")
+    	st.text("Crop Recommendation Engine | Weather Forecasting | Disease Detection")
 
     elif choice == "Login":
     	username = st.sidebar.text_input("Username")
