@@ -18,7 +18,7 @@ import pickle
 import pandas as pd
 from sklearn import preprocessing
 import numpy as np
-PATH = 'https://www.kaggle.com/abutalhai/crop-recommendation1csv/download'
+PATH = 'data/crop_recommendation1.csv'
 df = pd.read_csv(PATH, error_bad_lines=False)
 features = df[['N', 'P','K','temperature', 'humidity', 'ph', 'season', 'rainfall']]
 target = df['label']
