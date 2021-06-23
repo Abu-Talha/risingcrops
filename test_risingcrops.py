@@ -22,6 +22,7 @@ PATH = 'https://www.kaggle.com/abutalhai/crop-recommendation1csv/download'
 df = pd.read_csv(PATH)
 features = df[['N', 'P','K','temperature', 'humidity', 'ph', 'season', 'rainfall']]
 target = df['label']
+(N,P,K,temperature,humidity,ph,season,rainfall)=(92,42,43,20.8,82,6.5,0,202)
 from sklearn.model_selection import train_test_split
 Xtrain, Xtest, Ytrain, Ytest = train_test_split(features,target,test_size = 0.2,random_state =2)
 load_model = pickle.load(open('models/RandomForest1.pkl','rb'))
@@ -35,5 +36,5 @@ def test_random_forest():
 	assert acc_score == 0.9022727272727272
 
 def test_prediction():
-	(N,P,K,temperature,humidity,ph,season,rainfall)=(92,42,43,20.8,82,6.5,0,202)
+	
 	assert final_prediction == 'rice'
