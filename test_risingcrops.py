@@ -19,7 +19,7 @@ import pandas as pd
 from sklearn import preprocessing
 import numpy as np
 PATH = 'https://www.kaggle.com/abutalhai/crop-recommendation1csv/download'
-df = pd.read_csv(PATH)
+df = pd.read_csv(PATH, error_bad_lines=False)
 features = df[['N', 'P','K','temperature', 'humidity', 'ph', 'season', 'rainfall']]
 target = df['label']
 (N,P,K,temperature,humidity,ph,season,rainfall)=(92,42,43,20.8,82,6.5,0,202)
