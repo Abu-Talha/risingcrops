@@ -17,6 +17,7 @@ def test_database():
 import pickle
 import pandas as pd
 from sklearn import preprocessing
+import numpy as np
 PATH = 'https://www.kaggle.com/abutalhai/crop-recommendation1csv/download'
 df = pd.read_csv(PATH)
 features = df[['N', 'P','K','temperature', 'humidity', 'ph', 'season', 'rainfall']]
@@ -25,7 +26,7 @@ from sklearn.model_selection import train_test_split
 Xtrain, Xtest, Ytrain, Ytest = train_test_split(features,target,test_size = 0.2,random_state =2)
 load_model = pickle.load(open('models/RandomForest1.pkl','rb'))
 acc_score = load_model.score(Xtest,Ytest)
-data = np.array([[N, P, K, temperature, humidity, ph, season,rainfall]])
+data = np.array([[N, P, K, temperature, humidity, ph, season, rainfall]])
 my_prediction = model.predict(data)
 final_prediction = my_prediction[0]
 
