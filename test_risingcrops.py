@@ -28,7 +28,7 @@ Xtrain, Xtest, Ytrain, Ytest = train_test_split(features,target,test_size = 0.2,
 load_model = pickle.load(open('models/RandomForest1.pkl','rb'))
 acc_score = load_model.score(Xtest,Ytest)
 data = np.array([[N, P, K, temperature, humidity, ph, season, rainfall]])
-my_prediction = model.predict(data)
+my_prediction = load_model.predict(data)
 final_prediction = my_prediction[0]
 
 def test_random_forest():
