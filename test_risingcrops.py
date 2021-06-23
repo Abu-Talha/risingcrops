@@ -20,6 +20,13 @@ from sklearn import preprocessing
 import numpy as np
 PATH = 'data/crop_recommendation1.csv'
 df = pd.read_csv(PATH, error_bad_lines=False)
+category_col = ['season']
+labelEncoder = preprocessing.LabelEncoder()
+mapping_dict={}
+for col in category_col:
+	df[col] = labelEncoder.fit_transform(df[col])
+	le_name_mapping=dict(zip(labelEncoder.classes_,labelEncoder.transform(labelEncoder.classes_)))
+	mapping_dict[col]=le_name_mapping
 features = df[['N', 'P','K','temperature', 'humidity', 'ph', 'season', 'rainfall']]
 target = df['label']
 (N,P,K,temperature,humidity,ph,season,rainfall)=(92,42,43,20.8,82,6.5,0,202)
